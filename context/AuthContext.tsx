@@ -18,6 +18,7 @@ import { supabase } from '../services/supabaseClient';
 interface AuthUser {
   id: string;
   name: string;
+  username: string;
   role: Role;
   pinCode: string;
 }
@@ -31,7 +32,7 @@ interface AuthContextType {
   isLocked: boolean;
   lockUntil: number | null;
 
-  login: (pinCode: string) => Promise<void>;
+  login: (username: string, pinCode: string) => Promise<void>;
   logout: () => void;
   clearError: () => void;
 }
@@ -109,7 +110,7 @@ export const AuthProvider = ({ children }: { children?: ReactNode }) => {
   }, [isLocked, lockUntil]);
 
   const login = useCallback(
-    async (pinCode: string) => {
+    async (username: string, pinCode: string) => {
       try {
         setError(null);
 
@@ -119,17 +120,21 @@ export const AuthProvider = ({ children }: { children?: ReactNode }) => {
           throw new Error(`Tài khoản bị khóa. Vui lòng thử lại sau ${remainingMins} phút`);
         }
 
-        // Validate PIN format
+        // Validate username and PIN format
+        if (!username || username.trim().length === 0) {
+          throw new Error('Vui lòng nhập tên đăng nhập');
+        }
         if (!pinCode || pinCode.length < 4) {
           throw new Error('Mã PIN phải ít nhất 4 ký tự');
         }
 
         setIsLoading(true);
 
-        // Query database for employee with matching PIN
+        // Query database for employee with matching username and PIN
         const { data, error: dbError } = await supabase
           .from('employees')
-          .select('id, name, role, pin_code, status')
+          .select('id, name, username, role, pin_code, status')
+          .eq('username', username.trim())
           .eq('pin_code', pinCode)
           .eq('status', 'ACTIVE')
           .limit(1);
@@ -152,7 +157,7 @@ export const AuthProvider = ({ children }: { children?: ReactNode }) => {
           }
 
           throw new Error(
-            `Mã PIN không chính xác. Còn ${MAX_LOGIN_ATTEMPTS - newAttempts} lần thử`
+            `Tên đăng nhập hoặc mã PIN không chính xác. Còn ${MAX_LOGIN_ATTEMPTS - newAttempts} lần thử`
           );
         }
 
@@ -161,6 +166,7 @@ export const AuthProvider = ({ children }: { children?: ReactNode }) => {
         const authUser: AuthUser = {
           id: employee.id,
           name: employee.name,
+          username: employee.username,
           role: employee.role as Role,
           pinCode: employee.pin_code,
         };

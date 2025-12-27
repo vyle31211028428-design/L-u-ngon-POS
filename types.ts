@@ -124,8 +124,9 @@ export interface Order {
 export interface Employee {
   id: string;
   name: string;
+  username: string;          // NEW: Login username (unique)
   role: Role;
-  pinCode: string;           // 4 chữ số
+  pinCode: string;           // 4+ digits
   status: 'ACTIVE' | 'INACTIVE';
   createdAt?: string;
   updatedAt?: string;

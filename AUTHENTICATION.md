@@ -1,7 +1,7 @@
 # Authentication & Routing System
 
 ## Overview
-Hệ thống xác thực thực tế với PIN-based login + Role-based routing + Customer table access
+Hệ thống xác thực thực tế với Username + PIN-based login + Role-based routing + Customer table access
 
 ## Architecture
 
@@ -20,11 +20,21 @@ Hệ thống xác thực thực tế với PIN-based login + Role-based routing 
 │ (No Auth)    │               │ (Public)     │
 └──────────────┘               └──────┬───────┘
                                       │
-                              ┌───────▼───────┐
-                              │ Enter PIN     │
-                              │ Rate Limit    │
-                              │ Check DB      │
-                              └───────┬───────┘
+                        ┌─────────────┴──────────────┐
+                        │                            │
+                        ▼                            ▼
+                   ┌──────────────┐         ┌────────────────┐
+                   │ Enter Username│        │ Enter PIN Code │
+                   │              │         │                │
+                   └──────┬───────┘         └────────┬───────┘
+                          │                         │
+                          └────────┬────────────────┘
+                                   │
+                            ┌──────▼───────┐
+                            │ Rate Limit   │
+                            │ Check DB     │
+                            │ Match Both   │
+                            └──────┬───────┘
                                       │
                            ┌──────────┴──────────┐
                            │                     │
@@ -45,7 +55,7 @@ Hệ thống xác thực thực tế với PIN-based login + Role-based routing 
 ### 2. Route Structure
 
 #### Public Routes
-- `/login` - Login page (PIN input)
+- `/login` - Login page (Username + PIN input)
 - `/ban/:tableId` - Customer order interface (no auth)
 - `/table/:tableId` - Alternative customer URL
 
@@ -76,21 +86,18 @@ interface AuthContextType {
 ```
 
 **Features:**
-- ✅ PIN-based authentication (query employees table)
+- ✅ Username + PIN-based authentication (query employees table)
 - ✅ Rate limiting: 5 failed attempts = 15 minute lockout
 - ✅ Session persistence (localStorage)
 - ✅ Role-based user object
 - ✅ Lockout countdown timer
 
-#### LoginView.tsx
-```typescript
 - PIN input field (masked by default)
 - Show/hide PIN toggle
 - Attempt counter display
 - Lockout countdown (if locked)
 - Error message display
 - Auto-redirect to role page on success
-```
 
 **Rate Limiting UI:**
 - ❌ Failed attempt 1-4: Show "N more attempts remaining"
@@ -122,11 +129,13 @@ interface ProtectedRouteProps {
 
 #### Login Process
 ```
+User enters Username
+       ↓
 User enters PIN
        ↓
-[PIN Input Validation]
-  - Format check: >=4 digits
-  - Length check: not empty
+[Validation]
+  - Username: not empty
+  - PIN format check: >=4 digits
        ↓
 [Rate Limit Check]
   - Check if account locked
@@ -134,7 +143,8 @@ User enters PIN
        ↓
 [Database Query]
   SELECT * FROM employees
-  WHERE pin_code = ?
+  WHERE username = ?
+  AND pin_code = ?
   AND status = 'ACTIVE'
        ↓
 ┌──────────────┬──────────────┐
@@ -204,9 +214,9 @@ Session
 ```typescript
 const { login, error, loginAttempts } = useAuth();
 
-const handleLogin = async (pin: string) => {
+const handleLogin = async (username: string, pin: string) => {
   try {
-    await login(pin);  // Throws on error
+    await login(username, pin);  // Throws on error
     // Redirect happens automatically
   } catch (err) {
     console.error('Login failed:', err);
@@ -249,7 +259,7 @@ return (
 ## Security Considerations
 
 ### Current Implementation (MVP)
-- ✅ PIN-based auth (4+ digits)
+- ✅ Username + PIN-based auth (4+ digit PIN)
 - ✅ Client-side rate limiting
 - ✅ Session storage (localStorage)
 - ✅ Role-based routing
@@ -355,8 +365,8 @@ location.reload();
 - Single MainApp component → role-based rendering
 
 ### New System
-- AuthContext → authentication state
-- LoginView → PIN-based login
+- AuthContext → authentication state (username + PIN)
+- LoginView → Username + PIN-based login
 - ProtectedRoute → role-based access control
 - App Router → URL-based routing
 

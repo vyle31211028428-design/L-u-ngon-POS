@@ -213,6 +213,7 @@ export const RestaurantProvider = ({ children }: { children?: ReactNode }) => {
   const transformEmployee = (dbItem: any): Employee => ({
     id: dbItem.id,
     name: dbItem.name,
+    username: dbItem.username,
     role: dbItem.role,
     pinCode: dbItem.pin_code,
     status: dbItem.status,

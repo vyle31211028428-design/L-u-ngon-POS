@@ -27,8 +27,9 @@ const AdminView = () => {
   // Employee management state
   const [showEmployeeModal, setShowEmployeeModal] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState<typeof employees[0] | null>(null);
-  const [employeeForm, setEmployeeForm] = useState<{ name: string; role: Role; pinCode: string; status: 'ACTIVE' | 'INACTIVE' }>({ 
+  const [employeeForm, setEmployeeForm] = useState<{ name: string; username: string; role: Role; pinCode: string; status: 'ACTIVE' | 'INACTIVE' }>({ 
     name: '', 
+    username: '',
     role: 'STAFF' as unknown as Role, 
     pinCode: '', 
     status: 'ACTIVE' 
@@ -81,7 +82,7 @@ const AdminView = () => {
 
   const handleAddEmployee = () => {
     setEditingEmployee(null);
-    setEmployeeForm({ name: '', role: 'STAFF' as unknown as Role, pinCode: '', status: 'ACTIVE' });
+    setEmployeeForm({ name: '', username: '', role: 'STAFF' as unknown as Role, pinCode: '', status: 'ACTIVE' });
     setShowEmployeeModal(true);
   };
 
@@ -89,6 +90,7 @@ const AdminView = () => {
     setEditingEmployee(employee);
     setEmployeeForm({
       name: employee.name,
+      username: employee.username,
       role: employee.role,
       pinCode: employee.pinCode,
       status: employee.status,
@@ -100,6 +102,10 @@ const AdminView = () => {
     try {
       if (!employeeForm.name.trim()) {
         alert('Vui lòng nhập tên nhân viên');
+        return;
+      }
+      if (!employeeForm.username.trim()) {
+        alert('Vui lòng nhập tên đăng nhập');
         return;
       }
       if (!employeeForm.pinCode || employeeForm.pinCode.length < 4) {
@@ -123,7 +129,7 @@ const AdminView = () => {
       }
 
       setShowEmployeeModal(false);
-      setEmployeeForm({ name: '', role: 'STAFF' as unknown as Role, pinCode: '', status: 'ACTIVE' });
+      setEmployeeForm({ name: '', username: '', role: 'STAFF' as unknown as Role, pinCode: '', status: 'ACTIVE' });
     } catch (err) {
       alert('Lỗi: ' + (err instanceof Error ? err.message : 'Unknown error'));
     } finally {
@@ -725,6 +731,19 @@ const AdminView = () => {
                                     className="w-full px-4 py-3 bg-slate-100 rounded-xl border border-slate-200 focus:border-rose-600 focus:outline-none font-bold"
                                     placeholder="VD: Nguyễn Văn A"
                                 />
+                            </div>
+
+                            {/* Username */}
+                            <div>
+                                <label className="block text-xs font-black text-slate-700 uppercase mb-2">Tên đăng nhập (duy nhất)</label>
+                                <input
+                                    type="text"
+                                    value={employeeForm.username}
+                                    onChange={(e) => setEmployeeForm({...employeeForm, username: e.target.value})}
+                                    className="w-full px-4 py-3 bg-slate-100 rounded-xl border border-slate-200 focus:border-rose-600 focus:outline-none font-bold"
+                                    placeholder="VD: nguyen_van_a"
+                                />
+                                <p className="text-xs text-slate-500 mt-1">Dùng để đăng nhập cùng với mã PIN</p>
                             </div>
 
                             {/* Role */}

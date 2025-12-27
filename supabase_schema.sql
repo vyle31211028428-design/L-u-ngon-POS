@@ -300,6 +300,7 @@ COMMENT ON COLUMN tables.current_order_id IS 'Foreign key to active (unpaid) ord
 CREATE TABLE IF NOT EXISTS employees (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
+  username TEXT NOT NULL UNIQUE,  -- New: Login username (unique constraint)
   role TEXT NOT NULL CHECK (role IN ('ADMIN', 'STAFF', 'KITCHEN', 'CASHIER')),
   pin_code TEXT NOT NULL CHECK (pin_code ~ '^[0-9]{4,}$'),  -- At least 4 digits
   status TEXT NOT NULL DEFAULT 'ACTIVE' CHECK (status IN ('ACTIVE', 'INACTIVE')),
@@ -311,6 +312,7 @@ CREATE TABLE IF NOT EXISTS employees (
 CREATE INDEX IF NOT EXISTS idx_employees_role ON employees(role);
 CREATE INDEX IF NOT EXISTS idx_employees_status ON employees(status);
 CREATE INDEX IF NOT EXISTS idx_employees_pin_code ON employees(pin_code);
+CREATE INDEX IF NOT EXISTS idx_employees_username ON employees(username);  -- New: Username index
 
 -- Enable realtime for employees
 ALTER TABLE employees REPLICA IDENTITY FULL;
@@ -322,6 +324,7 @@ CREATE POLICY "Allow all for employees" ON employees
   FOR ALL USING (true);
 
 -- Comment
-COMMENT ON TABLE employees IS 'Employee management for POS system. PIN code is 4 digits for login.';
-COMMENT ON COLUMN employees.pin_code IS 'Login PIN code - exactly 4 digits.';
+COMMENT ON TABLE employees IS 'Employee management for POS system. Login requires both username and PIN code for better security.';
+COMMENT ON COLUMN employees.username IS 'Login username - must be unique.';
+COMMENT ON COLUMN employees.pin_code IS 'Login PIN code - at least 4 digits for enhanced security.';
 

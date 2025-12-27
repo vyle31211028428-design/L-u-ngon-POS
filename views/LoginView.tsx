@@ -1,6 +1,7 @@
 /**
  * LoginView.tsx
- * Màn hình đăng nhập bằng PIN
+ * Màn hình đăng nhập bằng Tên đăng nhập + Mã PIN
+ * - Input tên đăng nhập
  * - Input PIN (che dấu ký tự)
  * - Rate limiting feedback
  * - Redirect theo role sau khi đăng nhập
@@ -14,6 +15,7 @@ import { Lock, AlertCircle, Clock } from 'lucide-react';
 const LoginView: React.FC = () => {
   const navigate = useNavigate();
   const { login, isLoading, error, loginAttempts, isLocked, lockUntil, user, clearError } = useAuth();
+  const [username, setUsername] = useState('');
   const [pinCode, setPinCode] = useState('');
   const [showPin, setShowPin] = useState(false);
   const [remainingTime, setRemainingTime] = useState<number | null>(null);
@@ -53,7 +55,8 @@ const LoginView: React.FC = () => {
     clearError();
 
     try {
-      await login(pinCode);
+      await login(username, pinCode);
+      setUsername('');
       setPinCode('');
     } catch (err) {
       // Error is handled by AuthContext
@@ -74,7 +77,7 @@ const LoginView: React.FC = () => {
             <Lock className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Lẩu Ngon POS</h1>
-          <p className="text-gray-600">Đăng nhập bằng Mã PIN</p>
+          <p className="text-gray-600">Đăng nhập bằng Tên đăng nhập và Mã PIN</p>
         </div>
 
         {/* Login Form */}
@@ -107,6 +110,20 @@ const LoginView: React.FC = () => {
             </p>
           )}
 
+          {/* Username Input */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Tên đăng nhập</label>
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="Nhập tên đăng nhập"
+              disabled={isLocked || isLoading}
+              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-red-500 disabled:bg-gray-100 disabled:cursor-not-allowed transition"
+              autoFocus
+            />
+          </div>
+
           {/* PIN Input */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Mã PIN</label>
@@ -118,7 +135,6 @@ const LoginView: React.FC = () => {
                 placeholder="Nhập mã PIN của bạn"
                 disabled={isLocked || isLoading}
                 className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-red-500 text-center text-2xl tracking-widest disabled:bg-gray-100 disabled:cursor-not-allowed transition"
-                autoFocus
               />
               <button
                 type="button"
@@ -134,7 +150,7 @@ const LoginView: React.FC = () => {
           {/* Submit Button */}
           <button
             type="submit"
-            disabled={isLoading || isLocked || pinCode.length < 4}
+            disabled={isLoading || isLocked || username.trim().length === 0 || pinCode.length < 4}
             className="w-full bg-red-600 text-white font-semibold py-3 rounded-lg hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition flex items-center justify-center gap-2"
           >
             {isLoading && (
