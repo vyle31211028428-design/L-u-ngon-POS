@@ -1159,6 +1159,11 @@ export const RestaurantProvider = ({ children }: { children?: ReactNode }) => {
 
   const addEmployee = useCallback(async (employee: Omit<Employee, 'id' | 'createdAt' | 'updatedAt'>) => {
     try {
+      // Validate username
+      if (!employee.username || employee.username.trim().length === 0) {
+        throw new Error('Vui lòng nhập tên đăng nhập');
+      }
+
       // Validate PIN code (minimum 4 digits)
       if (!employee.pinCode || !/^\d{4,}$/.test(employee.pinCode)) {
         throw new Error('Mã PIN phải tối thiểu 4 chữ số');
@@ -1168,6 +1173,7 @@ export const RestaurantProvider = ({ children }: { children?: ReactNode }) => {
         .from('employees')
         .insert({
           name: employee.name,
+          username: employee.username.trim(),
           role: employee.role,
           pin_code: employee.pinCode,
           status: employee.status,
@@ -1186,6 +1192,11 @@ export const RestaurantProvider = ({ children }: { children?: ReactNode }) => {
 
   const updateEmployee = useCallback(async (employee: Employee) => {
     try {
+      // Validate username
+      if (!employee.username || employee.username.trim().length === 0) {
+        throw new Error('Vui lòng nhập tên đăng nhập');
+      }
+
       // Validate PIN code (minimum 4 digits)
       if (!employee.pinCode || !/^\d{4,}$/.test(employee.pinCode)) {
         throw new Error('Mã PIN phải tối thiểu 4 chữ số');
@@ -1195,6 +1206,7 @@ export const RestaurantProvider = ({ children }: { children?: ReactNode }) => {
         .from('employees')
         .update({
           name: employee.name,
+          username: employee.username.trim(),
           role: employee.role,
           pin_code: employee.pinCode,
           status: employee.status,
