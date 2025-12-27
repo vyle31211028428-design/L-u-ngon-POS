@@ -154,7 +154,7 @@ const CustomerView = () => {
             <p className="text-slate-500 font-medium">Chào mừng quý khách!</p>
         </div>
         
-        <div className="grid grid-cols-2 gap-4 w-full max-w-md">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 w-full max-w-md">
           {tables.map(t => (
             <button
               key={t.id}
@@ -162,7 +162,7 @@ const CustomerView = () => {
                 setActiveTableId(t.id);
                 if (t.status === TableStatus.EMPTY) startTableSession(t.id, 2);
               }}
-              className={`p-6 rounded-3xl border-2 transition-all group relative overflow-hidden ${
+              className={`p-3 sm:p-6 rounded-2xl sm:rounded-3xl border-2 transition-all group relative overflow-hidden ${
                 t.status === TableStatus.OCCUPIED 
                 ? 'bg-rose-50 border-rose-200 text-rose-900 shadow-md' 
                 : 'bg-white border-slate-200 hover:border-rose-400 hover:shadow-xl'
@@ -193,7 +193,7 @@ const CustomerView = () => {
   return (
     <div className="min-h-screen bg-white pb-32">
       {/* Header - Phân cấp mạnh hơn */}
-      <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-100 px-4 py-3 flex justify-between items-center">
+      <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-100 px-3 sm:px-4 py-2 sm:py-3 flex justify-between items-center">
         <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-rose-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-rose-200">
                 <span className="font-black text-lg">{activeTable?.name.split(' ')[1]}</span>
@@ -234,8 +234,8 @@ const CustomerView = () => {
         </div>
       </header>
 
-      {/* Danh mục - Có Sticky trượt mượt */}
-      <nav className="sticky top-[65px] z-20 bg-white/95 backdrop-blur-sm border-b border-slate-50 py-3 overflow-x-auto whitespace-nowrap px-4 scrollbar-hide">
+      {/* Danh mục - Responsive */}
+      <nav className="sticky top-[57px] sm:top-[65px] z-20 bg-white/95 backdrop-blur-sm border-b border-slate-50 py-2 sm:py-3 overflow-x-auto whitespace-nowrap px-3 sm:px-4 scrollbar-hide">
         <div className="flex gap-2">
             <button
                 onClick={() => setSelectedCategory('ALL')}
@@ -255,7 +255,7 @@ const CustomerView = () => {
         </div>
       </nav>
 
-      <main className="px-4 pt-6 max-w-2xl mx-auto">
+      <main className="px-3 sm:px-4 pt-4 sm:pt-6 max-w-2xl mx-auto w-full">
         {/* Recommended Slider - Tăng độ hấp dẫn */}
         {selectedCategory === 'ALL' && recommendedItems.length > 0 && (
             <section className="mb-10">
@@ -290,10 +290,10 @@ const CustomerView = () => {
         {/* Menu Grid - Sạch sẽ hơn */}
         <section>
             <h3 className="text-sm font-black text-slate-400 uppercase tracking-[0.2em] mb-4 px-1">DANH SÁCH MÓN ĂN</h3>
-            <div className="grid grid-cols-1 gap-4">
+            <div className="grid grid-cols-1 gap-3 sm:gap-4">
                 {filteredMenu.map(item => (
                     <div key={item.id} onClick={() => handleAddToCart(item)} className={`bg-white p-3 rounded-3xl border border-slate-100 shadow-sm flex gap-4 active:scale-[0.98] transition-all group ${!item.available ? 'opacity-60' : ''}`}>
-                        <div className="w-28 h-28 rounded-2xl overflow-hidden shrink-0 relative">
+                        <div className="w-20 h-20 sm:w-28 sm:h-28 rounded-xl sm:rounded-2xl overflow-hidden shrink-0 relative">
                             <img src={item.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                             {!item.available && (
                                 <div className="absolute inset-0 bg-slate-900/40 flex items-center justify-center">
@@ -340,7 +340,7 @@ const CustomerView = () => {
       </main>
 
       {/* Floating Action Bar - UX mới: Nút tính tiền luôn ở tầm mắt */}
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-full max-w-md px-4 flex gap-3">
+      <div className="fixed bottom-3 sm:bottom-6 left-1/2 -translate-x-1/2 z-40 w-full max-w-md px-3 sm:px-4 flex gap-2 sm:gap-3">
             <button onClick={() => requestBill(activeTableId!)} className="flex-1 bg-white border-2 border-slate-200 text-slate-700 h-16 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl flex items-center justify-center gap-2 hover:bg-slate-50 transition active:scale-95">
                 <Receipt size={20} className="text-rose-600" /> THANH TOÁN
             </button>

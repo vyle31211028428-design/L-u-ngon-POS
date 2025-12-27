@@ -39,9 +39,9 @@ const CashierView = () => {
   const finalTotal = Math.max(0, subTotal - discountAmount + vat);
 
   return (
-    <div className="min-h-screen bg-slate-50 flex overflow-hidden">
-      {/* Sidebar Bàn - Cực kỳ quan trọng: Ai chờ Bill phải lên đầu */}
-      <aside className="w-96 bg-white border-r border-slate-200 flex flex-col shrink-0 no-print">
+    <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row overflow-hidden">
+      {/* Sidebar Bàn - Responsive */}
+      <aside className="w-full md:w-96 bg-white border-b md:border-b-0 md:border-r border-slate-200 flex flex-col shrink-0 no-print max-h-96 md:max-h-none overflow-y-auto md:overflow-visible">
           <div className="p-6 border-b border-slate-100 flex justify-between items-center">
               <div>
                   <h1 className="text-xl font-black text-slate-800 uppercase tracking-tighter">CASHIER <span className="text-blue-600">STATION</span></h1>
@@ -99,7 +99,7 @@ const CashierView = () => {
       </aside>
 
       {/* Main Payment Area */}
-      <main className="flex-1 flex flex-col bg-slate-50/50 overflow-hidden relative">
+      <main className="flex-1 flex flex-col bg-slate-50/50 overflow-hidden relative w-full">
           {!selectedTableId ? (
               <div className="flex-1 flex flex-col items-center justify-center text-slate-300">
                   <Wallet size={100} className="opacity-10 mb-4" />

@@ -65,34 +65,34 @@ const StaffView = () => {
         </button>
       </header>
 
-      {/* Stats Summary - Cực kỳ hữu ích cho nhân viên phục vụ */}
-      <div className="grid grid-cols-4 gap-4 px-6 py-6 max-w-7xl mx-auto">
-          <div className="bg-white p-4 rounded-3xl shadow-sm border border-slate-100 flex items-center gap-4">
-              <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center"><Users size={24}/></div>
-              <div>
-                  <div className="text-xl font-black">{stats.occupied}/{stats.total}</div>
-                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Đang ngồi</div>
+      {/* Stats Summary - Responsive */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 px-3 md:px-6 py-4 md:py-6 max-w-7xl mx-auto">
+          <div className="bg-white p-3 md:p-4 rounded-2xl md:rounded-3xl shadow-sm border border-slate-100 flex items-center gap-2 md:gap-4">
+              <div className="w-10 h-10 md:w-12 md:h-12 bg-blue-50 text-blue-600 rounded-xl md:rounded-2xl flex items-center justify-center flex-shrink-0"><Users size={20} className="md:w-6 md:h-6"/></div>
+              <div className="min-w-0">
+                  <div className="text-lg md:text-xl font-black truncate">{stats.occupied}/{stats.total}</div>
+                  <div className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest">Đang ngồi</div>
               </div>
           </div>
-          <div className="bg-white p-4 rounded-3xl shadow-sm border border-slate-100 flex items-center gap-4">
-              <div className="w-12 h-12 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center"><Clock size={24}/></div>
-              <div>
-                  <div className="text-xl font-black">{stats.billNeeded}</div>
-                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Chờ Bill</div>
+          <div className="bg-white p-3 md:p-4 rounded-2xl md:rounded-3xl shadow-sm border border-slate-100 flex items-center gap-2 md:gap-4">
+              <div className="w-10 h-10 md:w-12 md:h-12 bg-amber-50 text-amber-600 rounded-xl md:rounded-2xl flex items-center justify-center flex-shrink-0"><Clock size={20} className="md:w-6 md:h-6"/></div>
+              <div className="min-w-0">
+                  <div className="text-lg md:text-xl font-black truncate">{stats.billNeeded}</div>
+                  <div className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest">Chờ Bill</div>
               </div>
           </div>
-          <div className="bg-white p-4 rounded-3xl shadow-sm border border-slate-100 flex items-center gap-4">
-              <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center animate-bounce"><Bell size={24}/></div>
-              <div>
-                  <div className="text-xl font-black text-emerald-600">{stats.readyItemsTotal}</div>
-                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Món xong</div>
+          <div className="bg-white p-3 md:p-4 rounded-2xl md:rounded-3xl shadow-sm border border-slate-100 flex items-center gap-2 md:gap-4">
+              <div className="w-10 h-10 md:w-12 md:h-12 bg-emerald-50 text-emerald-600 rounded-xl md:rounded-2xl flex items-center justify-center flex-shrink-0 animate-bounce"><Bell size={20} className="md:w-6 md:h-6"/></div>
+              <div className="min-w-0">
+                  <div className="text-lg md:text-xl font-black text-emerald-600 truncate">{stats.readyItemsTotal}</div>
+                  <div className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest">Món xong</div>
               </div>
           </div>
-          <div className="bg-white p-4 rounded-3xl shadow-sm border border-slate-100 flex items-center gap-4">
-              <div className="w-12 h-12 bg-rose-50 text-rose-600 rounded-2xl flex items-center justify-center"><Sparkles size={24}/></div>
-              <div>
-                  <div className="text-xl font-black">{stats.dirty}</div>
-                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Cần dọn</div>
+          <div className="bg-white p-3 md:p-4 rounded-2xl md:rounded-3xl shadow-sm border border-slate-100 flex items-center gap-2 md:gap-4">
+              <div className="w-10 h-10 md:w-12 md:h-12 bg-rose-50 text-rose-600 rounded-xl md:rounded-2xl flex items-center justify-center flex-shrink-0"><Sparkles size={20} className="md:w-6 md:h-6"/></div>
+              <div className="min-w-0">
+                  <div className="text-lg md:text-xl font-black truncate">{stats.dirty}</div>
+                  <div className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest">Cần dọn</div>
               </div>
           </div>
       </div>

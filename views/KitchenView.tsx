@@ -181,8 +181,8 @@ const KitchenView = () => {
         </div>
       </header>
 
-      <div className="flex flex-1 overflow-hidden">
-        <aside className="w-80 bg-[#0f172a] border-r border-slate-800 flex flex-col">
+      <div className="flex flex-col md:flex-row flex-1 overflow-hidden">
+        <aside className="w-full md:w-80 bg-[#0f172a] border-b md:border-b-0 md:border-r border-slate-800 flex flex-col max-h-48 md:max-h-none overflow-y-auto md:overflow-visible">
             <div className="p-5 border-b border-slate-800 bg-slate-900/50">
                 <h2 className="font-black text-[10px] uppercase tracking-[0.3em] text-slate-500 flex items-center gap-2">
                     <ListFilter size={14}/> TỔNG HỢP CẦN LÀM
@@ -207,7 +207,7 @@ const KitchenView = () => {
             </div>
         </aside>
 
-        <main className="flex-1 overflow-x-auto overflow-y-hidden bg-[#020617] p-6 flex gap-6 scrollbar-hide">
+        <main className="flex-1 overflow-x-auto overflow-y-hidden bg-[#020617] p-3 sm:p-6 flex gap-3 sm:gap-6 scrollbar-hide">
             {filteredItems.length === 0 ? (
                 <div className="flex-1 flex flex-col items-center justify-center text-slate-800">
                     <Utensils size={100} className="opacity-5 mb-6" />

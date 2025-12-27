@@ -620,7 +620,7 @@ const AdminView = () => {
                     </div>
 
                     {/* Employees Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
                         {employees.map(employee => (
                             <div key={employee.id} className="bg-white p-6 rounded-[32px] shadow-sm border border-slate-100 hover:shadow-lg transition-all">
                                 {/* Avatar & Header */}
