@@ -1,13 +1,17 @@
 
 import React, { useMemo, useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useRestaurant } from '../context/RestaurantContext';
+import { useAuth } from '../context/AuthContext';
 import { OrderItem, OrderItemStatus, ProductCategory } from '../types';
 import { Clock, CheckCircle, Flame, Coffee, Utensils, XCircle, MessageSquare, Wifi, WifiOff, LogOut, ChevronRight, AlertTriangle, ListFilter, Play, Zap, Eye, EyeOff } from 'lucide-react';
 
 type FilterType = 'ALL' | 'KITCHEN' | 'BAR';
 
 const KitchenView = () => {
-  const { orders, updateOrderItemStatus, updateOrderItemKitchenNote, tables, menu, setRole, markItemOutOfStock } = useRestaurant();
+  const navigate = useNavigate();
+  const { logout } = useAuth();
+  const { orders, updateOrderItemStatus, updateOrderItemKitchenNote, tables, menu, markItemOutOfStock } = useRestaurant();
   const [filterType, setFilterType] = useState<FilterType>('ALL');
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [currentTime, setCurrentTime] = useState(Date.now());
@@ -165,7 +169,13 @@ const KitchenView = () => {
                 <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-emerald-500' : 'bg-rose-500 animate-ping'}`}></div>
                 {isOnline ? 'ONLINE' : 'OFFLINE'}
             </div>
-            <button onClick={() => setRole(null)} className="p-3 bg-slate-900 hover:bg-rose-500/20 text-slate-500 hover:text-rose-400 rounded-2xl transition-all border border-slate-800">
+            <button
+              onClick={() => {
+                logout();
+                navigate('/login', { replace: true });
+              }}
+              className="p-3 bg-slate-900 hover:bg-rose-500/20 text-slate-500 hover:text-rose-400 rounded-2xl transition-all border border-slate-800"
+            >
                 <LogOut size={20} />
             </button>
         </div>

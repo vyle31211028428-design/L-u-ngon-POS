@@ -1,15 +1,19 @@
 
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useRestaurant } from '../context/RestaurantContext';
+import { useAuth } from '../context/AuthContext';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, PieChart, Pie } from 'recharts';
 import { generateDailyReport } from '../services/geminiService';
 // Added missing Calendar icon import
-import { LayoutDashboard, Menu as MenuIcon, Settings, Sparkles, Plus, Edit, Trash2, X, Save, Eye, EyeOff, Users, KeyRound, Download, GripVertical, LogOut, TrendingUp, TrendingDown, Layers, Rocket, Calendar, AlertCircle, Power, ChefHat, Shield, Phone as PhoneIcon } from 'lucide-react';
+import { LayoutDashboard, Menu as MenuIcon, Settings, Sparkles, Plus, Edit, Trash2, X, Save, Eye, EyeOff, Users, KeyRound, Download, GripVertical, LogOut, TrendingUp, TrendingDown, Layers, Rocket, Calendar, AlertCircle, Power, ChefHat, Shield, Phone as PhoneIcon, Dices } from 'lucide-react';
 import { ProductCategory, MenuItem, Role, ItemType, Employee } from '../types';
 import { CATEGORY_LABELS } from '../constants';
 
 const AdminView = () => {
-  const { orders, menu, tables, employees, addMenuItem, updateMenuItem, deleteMenuItem, reorderMenu, addEmployee, updateEmployee, deleteEmployee, clearTodayRevenue, closeDay, setRole } = useRestaurant();
+  const navigate = useNavigate();
+  const { logout } = useAuth();
+  const { orders, menu, tables, employees, addMenuItem, updateMenuItem, deleteMenuItem, reorderMenu, addEmployee, updateEmployee, deleteEmployee, clearTodayRevenue, closeDay, generateUniquePIN } = useRestaurant();
   const [activeTab, setActiveTab] = useState<'DASHBOARD' | 'MENU' | 'EMPLOYEES' | 'SETTINGS'>('DASHBOARD');
   const [aiReport, setAiReport] = useState<string>('');
   const [isLoadingReport, setIsLoadingReport] = useState(false);
@@ -31,6 +35,7 @@ const AdminView = () => {
   });
   const [showPinCode, setShowPinCode] = useState<string | null>(null);
   const [isSubmittingEmployee, setIsSubmittingEmployee] = useState(false);
+  const [isGeneratingPin, setIsGeneratingPin] = useState(false);
 
   const totalRevenue = orders.reduce((sum, o) => sum + o.totalAmount, 0);
   const totalOrders = orders.length;
@@ -97,8 +102,12 @@ const AdminView = () => {
         alert('Vui lòng nhập tên nhân viên');
         return;
       }
-      if (!/^\d{4}$/.test(employeeForm.pinCode)) {
-        alert('Mã PIN phải đúng 4 chữ số');
+      if (!employeeForm.pinCode || employeeForm.pinCode.length < 4) {
+        alert('Mã PIN phải tối thiểu 4 chữ số');
+        return;
+      }
+      if (!/^\d{4,}$/.test(employeeForm.pinCode)) {
+        alert('Mã PIN chỉ chứa số');
         return;
       }
 
@@ -119,6 +128,18 @@ const AdminView = () => {
       alert('Lỗi: ' + (err instanceof Error ? err.message : 'Unknown error'));
     } finally {
       setIsSubmittingEmployee(false);
+    }
+  };
+
+  const handleGeneratePin = async () => {
+    try {
+      setIsGeneratingPin(true);
+      const newPin = await generateUniquePIN();
+      setEmployeeForm({ ...employeeForm, pinCode: newPin });
+    } catch (err) {
+      alert('Lỗi: ' + (err instanceof Error ? err.message : 'Unknown error'));
+    } finally {
+      setIsGeneratingPin(false);
     }
   };
 
@@ -164,7 +185,13 @@ const AdminView = () => {
             </div>
             
             <div className="mt-auto p-8 border-t border-slate-800/50">
-                <button onClick={() => setRole(null)} className="w-full flex items-center gap-4 px-5 py-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 hover:text-rose-400 transition-colors">
+                <button
+                  onClick={() => {
+                    logout();
+                    navigate('/login', { replace: true });
+                  }}
+                  className="w-full flex items-center gap-4 px-5 py-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 hover:text-rose-400 transition-colors"
+                >
                     <LogOut size={18}/> ĐĂNG XUẤT
                 </button>
             </div>
@@ -722,18 +749,28 @@ const AdminView = () => {
 
                             {/* PIN Code */}
                             <div>
-                                <label className="block text-xs font-black text-slate-700 uppercase mb-2">Mã PIN (4 chữ số)</label>
-                                <input
-                                    type="password"
-                                    value={employeeForm.pinCode}
-                                    onChange={(e) => {
-                                        const val = e.target.value.replace(/\D/g, '').slice(0, 4);
-                                        setEmployeeForm({...employeeForm, pinCode: val});
-                                    }}
-                                    className="w-full px-4 py-3 bg-slate-100 rounded-xl border border-slate-200 focus:border-rose-600 focus:outline-none font-black text-center text-2xl tracking-widest"
-                                    placeholder="••••"
-                                    maxLength={4}
-                                />
+                                <label className="block text-xs font-black text-slate-700 uppercase mb-2">Mã PIN (tối thiểu 4 chữ số)</label>
+                                <div className="flex gap-2">
+                                    <input
+                                        type="text"
+                                        value={employeeForm.pinCode}
+                                        onChange={(e) => {
+                                            const val = e.target.value.replace(/\D/g, '');
+                                            setEmployeeForm({...employeeForm, pinCode: val});
+                                        }}
+                                        className="flex-1 px-4 py-3 bg-slate-100 rounded-xl border border-slate-200 focus:border-rose-600 focus:outline-none font-black text-center text-2xl tracking-widest"
+                                        placeholder="0000"
+                                    />
+                                    <button
+                                        onClick={handleGeneratePin}
+                                        disabled={isGeneratingPin}
+                                        className="bg-slate-700 hover:bg-slate-800 disabled:bg-slate-400 text-white px-4 py-3 rounded-xl font-black transition-all flex items-center gap-2"
+                                        title="Tạo mã PIN 4 chữ số tự động"
+                                    >
+                                        <Dices size={18} />
+                                        {isGeneratingPin ? 'Đang tạo...' : 'Tạo'}
+                                    </button>
+                                </div>
                             </div>
 
                             {/* Status */}

@@ -301,7 +301,7 @@ CREATE TABLE IF NOT EXISTS employees (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
   role TEXT NOT NULL CHECK (role IN ('ADMIN', 'STAFF', 'KITCHEN', 'CASHIER')),
-  pin_code TEXT NOT NULL CHECK (pin_code ~ '^\d{4}$'),  -- Exactly 4 digits
+  pin_code TEXT NOT NULL CHECK (pin_code ~ '^[0-9]{4,}$'),  -- At least 4 digits
   status TEXT NOT NULL DEFAULT 'ACTIVE' CHECK (status IN ('ACTIVE', 'INACTIVE')),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP

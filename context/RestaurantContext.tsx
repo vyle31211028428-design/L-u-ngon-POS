@@ -103,6 +103,7 @@ interface RestaurantContextType {
   addEmployee: (employee: Omit<Employee, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
   updateEmployee: (employee: Employee) => Promise<void>;
   deleteEmployee: (id: string) => Promise<void>;
+  generateUniquePIN: () => Promise<string>;
 }
 
 // ============================================================
@@ -1157,9 +1158,9 @@ export const RestaurantProvider = ({ children }: { children?: ReactNode }) => {
 
   const addEmployee = useCallback(async (employee: Omit<Employee, 'id' | 'createdAt' | 'updatedAt'>) => {
     try {
-      // Validate PIN code
-      if (!employee.pinCode || !/^\d{4}$/.test(employee.pinCode)) {
-        throw new Error('PIN code must be exactly 4 digits');
+      // Validate PIN code (minimum 4 digits)
+      if (!employee.pinCode || !/^\d{4,}$/.test(employee.pinCode)) {
+        throw new Error('Mã PIN phải tối thiểu 4 chữ số');
       }
 
       const { error } = await supabase
@@ -1184,9 +1185,9 @@ export const RestaurantProvider = ({ children }: { children?: ReactNode }) => {
 
   const updateEmployee = useCallback(async (employee: Employee) => {
     try {
-      // Validate PIN code
-      if (!employee.pinCode || !/^\d{4}$/.test(employee.pinCode)) {
-        throw new Error('PIN code must be exactly 4 digits');
+      // Validate PIN code (minimum 4 digits)
+      if (!employee.pinCode || !/^\d{4,}$/.test(employee.pinCode)) {
+        throw new Error('Mã PIN phải tối thiểu 4 chữ số');
       }
 
       const { error } = await supabase
@@ -1207,6 +1208,45 @@ export const RestaurantProvider = ({ children }: { children?: ReactNode }) => {
       setError(errorMsg);
       console.error('Error updating employee:', err);
       throw err;
+    }
+  }, []);
+
+  const generateUniquePIN = useCallback(async (): Promise<string> => {
+    try {
+      let pin = '';
+      let isUnique = false;
+      let attempts = 0;
+      const maxAttempts = 50;
+
+      while (!isUnique && attempts < maxAttempts) {
+        // Generate random 4-digit PIN (0000-9999)
+        pin = String(Math.floor(Math.random() * 10000)).padStart(4, '0');
+
+        // Check if PIN already exists in database
+        const { data, error } = await supabase
+          .from('employees')
+          .select('id')
+          .eq('pin_code', pin)
+          .limit(1);
+
+        if (error) throw error;
+
+        if (!data || data.length === 0) {
+          isUnique = true;
+        } else {
+          attempts++;
+        }
+      }
+
+      if (!isUnique) {
+        throw new Error('Could not generate unique PIN after 50 attempts');
+      }
+
+      return pin;
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Unknown error';
+      console.error('Error generating PIN:', err);
+      throw new Error('Lỗi tạo mã PIN: ' + errorMsg);
     }
   }, []);
 
@@ -1269,6 +1309,7 @@ export const RestaurantProvider = ({ children }: { children?: ReactNode }) => {
     addEmployee,
     updateEmployee,
     deleteEmployee,
+    generateUniquePIN,
   };
 
   return (

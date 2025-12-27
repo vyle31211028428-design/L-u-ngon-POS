@@ -1,12 +1,16 @@
 
 import React, { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useRestaurant } from '../context/RestaurantContext';
+import { useAuth } from '../context/AuthContext';
 import { TableStatus, OrderItemStatus, MenuItem, ProductCategory, ItemType } from '../types';
 import { CATEGORY_LABELS } from '../constants';
 import { User, CheckSquare, Bell, Sparkles, Receipt, PlusCircle, Search, X, Minus, Plus, Trash2, Edit3, Clock, ChefHat, CheckCircle, Info, LogOut, ArrowLeft, ArrowRightLeft, CalendarClock, Phone, UserCheck, Calendar, Users } from 'lucide-react';
 
 const StaffView = () => {
-  const { tables, orders, menu, reservations, updateOrderItemStatus, startTableSession, closeTable, addItemToOrder, setRole, moveTable, addReservation, cancelReservation, checkInReservation } = useRestaurant();
+  const navigate = useNavigate();
+  const { logout } = useAuth();
+  const { tables, orders, menu, reservations, updateOrderItemStatus, startTableSession, closeTable, addItemToOrder, moveTable, addReservation, cancelReservation, checkInReservation } = useRestaurant();
   const [viewMode, setViewMode] = useState<'TABLES' | 'RESERVATIONS'>('TABLES');
   const [orderingTableId, setOrderingTableId] = useState<string | null>(null);
   const [detailTableId, setDetailTableId] = useState<string | null>(null);
@@ -51,8 +55,13 @@ const StaffView = () => {
                 <button onClick={() => setViewMode('RESERVATIONS')} className={`px-4 py-2 rounded-lg text-xs font-black transition-all ${viewMode === 'RESERVATIONS' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-400'}`}>ĐẶT TRƯỚC</button>
             </div>
         </div>
-        <button onClick={() => setRole(null)} className="p-2 bg-slate-100 text-slate-500 rounded-xl hover:bg-rose-50 hover:text-rose-600 transition">
-            <LogOut size={20} />
+        <button
+          onClick={() => {
+            logout();
+            navigate('/login', { replace: true });
+          }}
+          className="p-2 bg-slate-100 text-slate-500 rounded-xl hover:bg-rose-50 hover:text-rose-600 transition"
+        >            <LogOut size={20} />
         </button>
       </header>
 

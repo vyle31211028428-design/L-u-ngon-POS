@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS employees (
 | id | UUID | ID Nhân viên (Tự sinh) | `550e8400-e29b-41d4-a716-446655440000` |
 | name | TEXT | Tên nhân viên | `Nguyễn Văn A` |
 | role | TEXT | Vai trò (Enum) | `KITCHEN`, `CASHIER`, `STAFF`, `ADMIN` |
-| pin_code | TEXT | Mã PIN 4 chữ số | `1234` |
+| pin_code | TEXT | Mã PIN 4 chữ số | `1234`, `0000`, `9999` |
 | status | TEXT | Trạng thái | `ACTIVE` hoặc `INACTIVE` |
 | created_at | TIMESTAMPTZ | Ngày tạo | `2025-12-27T10:00:00Z` |
 | updated_at | TIMESTAMPTZ | Ngày sửa cuối | `2025-12-27T10:00:00Z` |
@@ -442,7 +442,7 @@ const employees = useRestaurant().employees;
 **A:** Chúng tôi dùng Soft Delete (chỉ chuyển status → INACTIVE) nên dữ liệu vẫn giữ lại. Để khôi phục, hãy sửa nhân viên đó và chuyển status về ACTIVE.
 
 ### Q: Có thể set PIN code là gì?
-**A:** PIN phải đúng **4 chữ số**. VD: 1234, 0000, 9999, v.v. Không được chứa chữ cái hay ký tự đặc biệt.
+**A:** PIN phải đúng **4 chữ số**. VD: 1234, 0000, 9999, v.v. Bạn có thể nhập tay hoặc click nút "Tạo" để sinh mã PIN ngẫu nhiên 4 số, hệ thống sẽ kiểm tra không trùng với nhân viên khác.
 
 ### Q: Real-time không hoạt động?
 **A:** Kiểm tra:

@@ -1,11 +1,15 @@
 
 import React, { useState, useRef, useMemo, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useRestaurant } from '../context/RestaurantContext';
+import { useAuth } from '../context/AuthContext';
 import { TableStatus, OrderItemStatus } from '../types';
 import { Receipt, CreditCard, Banknote, QrCode, LogOut, X, Printer, Percent, History, Calendar, ArrowLeft, Search, Wallet } from 'lucide-react';
 
 const CashierView = () => {
-  const { tables, orders, checkoutTable, closeTable, setRole, applyDiscount } = useRestaurant();
+  const navigate = useNavigate();
+  const { logout } = useAuth();
+  const { tables, orders, checkoutTable, closeTable, applyDiscount } = useRestaurant();
   const [selectedTableId, setSelectedTableId] = useState<string | null>(null);
   const [showHistory, setShowHistory] = useState(false);
   const [discountValue, setDiscountValue] = useState<number>(0);
@@ -83,8 +87,13 @@ const CashierView = () => {
           </div>
 
           <div className="p-6 border-t border-slate-100 bg-slate-50">
-              <button onClick={() => setRole(null)} className="w-full h-12 bg-white border border-slate-200 text-slate-400 font-bold rounded-xl hover:text-rose-600 hover:border-rose-200 transition-all flex items-center justify-center gap-2">
-                  <LogOut size={18} /> ĐĂNG XUẤT
+              <button
+                onClick={() => {
+                  logout();
+                  navigate('/login', { replace: true });
+                }}
+                className="w-full h-12 bg-white border border-slate-200 text-slate-400 font-bold rounded-xl hover:text-rose-600 hover:border-rose-200 transition-all flex items-center justify-center gap-2"
+              >                  <LogOut size={18} /> ĐĂNG XUẤT
               </button>
           </div>
       </aside>
