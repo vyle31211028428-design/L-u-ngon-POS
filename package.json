@@ -1,0 +1,38 @@
+{
+  "name": "lau-ngon-pos",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Hệ thống quản lý nhà hàng lẩu",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "test": "jest",
+    "test:watch": "jest --watch"
+  },
+  "dependencies": {
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "lucide-react": "^0.562.0",
+    "recharts": "^3.6.0",
+    "@google/generative-ai": "^0.3.0",
+    "react-router-dom": "^6.22.3",
+    "@supabase/supabase-js": "^2.39.0",
+    "clsx": "^2.0.0",
+    "class-variance-authority": "^0.7.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "@types/jest": "^29.5.12",
+    "ts-jest": "^29.1.2",
+    "typescript": "^5.3.3",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@types/node": "^20.0.0",
+    "vite": "^5.0.0",
+    "@vitejs/plugin-react": "^4.2.0",
+    "tailwindcss": "^3.3.0",
+    "postcss": "^8.4.0",
+    "autoprefixer": "^10.4.0"
+  }
+}

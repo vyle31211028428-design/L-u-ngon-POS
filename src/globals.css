@@ -1,0 +1,83 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  @apply box-border;
+}
+
+html, body, #root {
+  @apply h-full w-full;
+}
+
+body {
+  @apply bg-white dark:bg-slate-900 text-slate-900 dark:text-white transition-colors;
+}
+
+/* Kitchen View specific */
+.kitchen-view {
+  @apply dark bg-slate-950 text-white;
+}
+
+/* Smooth scrolling */
+html {
+  @apply scroll-smooth;
+}
+
+/* Selection prevention for kitchen + staff + cashier */
+.no-select {
+  @apply select-none;
+}
+
+/* Toast notifications base */
+.toast-container {
+  @apply fixed bottom-4 right-4 z-50 flex flex-col gap-2 max-w-sm;
+}
+
+.toast {
+  @apply p-4 rounded-lg shadow-lg animate-slide-up;
+}
+
+.toast.success {
+  @apply bg-green-500 text-white;
+}
+
+.toast.error {
+  @apply bg-red-500 text-white;
+}
+
+.toast.warning {
+  @apply bg-orange-500 text-white;
+}
+
+.toast.info {
+  @apply bg-blue-500 text-white;
+}
+
+/* Responsive utilities for mobile-first */
+@media (max-width: 640px) {
+  body {
+    @apply text-sm;
+  }
+}
+
+/* Kitchen burn effect animation */
+.burn-yellow {
+  @apply border-4 border-yellow-500;
+}
+
+.burn-red {
+  @apply border-4 border-red-600 animate-burn-flash;
+}
+
+/* Loading skeleton */
+.skeleton {
+  @apply bg-gray-200 dark:bg-slate-700 rounded animate-pulse;
+}
+
+/* Disable pinch zoom on iOS for better UX */
+input,
+select,
+textarea {
+  font-size: 16px !important;
+}

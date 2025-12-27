@@ -1,0 +1,343 @@
+
+import React, { useMemo, useState, useEffect, useRef } from 'react';
+import { useRestaurant } from '../context/RestaurantContext';
+import { OrderItem, OrderItemStatus, ProductCategory } from '../types';
+import { Clock, CheckCircle, Flame, Coffee, Utensils, XCircle, MessageSquare, Wifi, WifiOff, LogOut, ChevronRight, AlertTriangle, ListFilter, Play, Zap, Eye, EyeOff } from 'lucide-react';
+
+type FilterType = 'ALL' | 'KITCHEN' | 'BAR';
+
+const KitchenView = () => {
+  const { orders, updateOrderItemStatus, updateOrderItemKitchenNote, tables, menu, setRole, markItemOutOfStock } = useRestaurant();
+  const [filterType, setFilterType] = useState<FilterType>('ALL');
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [currentTime, setCurrentTime] = useState(Date.now());
+  const [hideCompleted, setHideCompleted] = useState(false);
+  const [completedItems, setCompletedItems] = useState<Set<string>>(new Set());
+  
+  const [noteModalItem, setNoteModalItem] = useState<{orderId: string, itemId: string, currentNote: string} | null>(null);
+  const [noteInputValue, setNoteInputValue] = useState('');
+  const audioRef = useRef<HTMLAudioElement>(null);
+
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+      const handleOnline = () => setIsOnline(true);
+      const handleOffline = () => setIsOnline(false);
+      window.addEventListener('online', handleOnline);
+      window.addEventListener('offline', handleOffline);
+      return () => {
+          window.removeEventListener('online', handleOnline);
+          window.removeEventListener('offline', handleOffline);
+      }
+  }, []);
+
+  const activeItems = useMemo(() => {
+    const items: { orderId: string; tableId: string; item: OrderItem }[] = [];
+    orders.forEach(order => {
+        if (!order.isPaid) {
+            order.items.forEach(item => {
+                if (item.status !== OrderItemStatus.SERVED && item.status !== OrderItemStatus.CANCELLED) {
+                   items.push({ orderId: order.id, tableId: order.tableId, item });
+                }
+            });
+        }
+    });
+    return items;
+  }, [orders]);
+
+  const filteredItems = useMemo(() => {
+      let result = activeItems;
+      if (filterType !== 'ALL') {
+          result = result.filter(entry => {
+              const menuItem = menu.find(m => m.id === entry.item.menuItemId);
+              if (!menuItem) return true;
+              return filterType === 'BAR' ? menuItem.category === ProductCategory.DRINK : menuItem.category !== ProductCategory.DRINK;
+          });
+      }
+      if (hideCompleted) {
+          result = result.filter(({ item }) => !completedItems.has(item.id));
+      }
+      return result.sort((a, b) => a.item.timestamp - b.item.timestamp);
+  }, [activeItems, filterType, menu, hideCompleted, completedItems]);
+
+  const aggregatedNeeded = useMemo(() => {
+    const summary: Record<string, { name: string, total: number, category: ProductCategory }> = {};
+    filteredItems.forEach(({ item }) => {
+        if (item.status === OrderItemStatus.PENDING || item.status === OrderItemStatus.PREPARING) {
+            const menuItem = menu.find(m => m.id === item.menuItemId);
+            if (!summary[item.menuItemId]) {
+                summary[item.menuItemId] = { 
+                    name: item.name, 
+                    total: 0, 
+                    category: menuItem?.category || ProductCategory.OTHER 
+                };
+            }
+            summary[item.menuItemId].total += item.quantity;
+        }
+    });
+    return Object.values(summary);
+  }, [filteredItems, menu]);
+
+  const getTableName = (id: string) => tables.find(t => t.id === id)?.name || id;
+
+  const handleStatusChange = (orderId: string, itemId: string, currentStatus: OrderItemStatus) => {
+      let nextStatus = currentStatus;
+      if (currentStatus === OrderItemStatus.PENDING) {
+        nextStatus = OrderItemStatus.PREPARING;
+      } else if (currentStatus === OrderItemStatus.PREPARING) {
+        nextStatus = OrderItemStatus.READY;
+        // Play sound & auto-hide after 3 seconds
+        audioRef.current?.play().catch(() => {});
+        setCompletedItems(prev => new Set([...prev, itemId]));
+        setTimeout(() => {
+          setCompletedItems(prev => {
+            const next = new Set(prev);
+            next.delete(itemId);
+            return next;
+          });
+        }, 3000);
+      } else if (currentStatus === OrderItemStatus.READY) {
+        nextStatus = OrderItemStatus.SERVED;
+      }
+      updateOrderItemStatus(orderId, itemId, nextStatus);
+  };
+
+  const getTimeElapsed = (timestamp: number) => {
+      return Math.floor((currentTime - timestamp) / 60000);
+  };
+
+  const getUrgencyColor = (elapsed: number, status: OrderItemStatus) => {
+    if (status === OrderItemStatus.READY) return 'emerald';
+    if (elapsed >= 20) return 'rose';
+    if (elapsed >= 15) return 'orange';
+    if (elapsed >= 10) return 'amber';
+    return 'slate';
+  };
+
+  return (
+    <div className="min-h-screen bg-[#020617] text-slate-100 flex flex-col h-screen overflow-hidden font-sans">
+      <audio ref={audioRef} src="data:audio/wav;base64,UklGRiYAAABXQVZFZm10IBAAAAABAAEAQB8AAAB9AAACABAAZGF0YQIAAAAAAA==" />
+      
+      <header className="bg-[#0f172a] border-b border-slate-800 p-4 flex justify-between items-center shadow-2xl z-20">
+        <div className="flex items-center gap-8">
+            <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-rose-600 rounded-xl shadow-lg shadow-rose-900/40">
+                    <Flame className="text-white animate-pulse" size={24} />
+                </div>
+                <div>
+                    <h1 className="text-2xl font-black uppercase tracking-tighter leading-none">KDS ELITE</h1>
+                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">Kitchen Display System</span>
+                </div>
+            </div>
+            
+            <div className="flex bg-slate-900 p-1.5 rounded-2xl border border-slate-800">
+                {(['ALL', 'KITCHEN', 'BAR'] as FilterType[]).map((t) => (
+                    <button
+                        key={t}
+                        onClick={() => setFilterType(t)}
+                        className={`px-8 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
+                            filterType === t 
+                            ? (t === 'BAR' ? 'bg-purple-600' : t === 'KITCHEN' ? 'bg-rose-600' : 'bg-blue-600') + ' text-white shadow-xl'
+                            : 'text-slate-500 hover:text-slate-300'
+                        }`}
+                    >
+                        {t === 'ALL' ? 'Tất cả' : t === 'KITCHEN' ? 'Bếp' : 'Bar'}
+                    </button>
+                ))}
+            </div>
+        </div>
+
+        <div className="flex items-center gap-6">
+            <div className="text-right hidden md:block">
+                <div className="text-xl font-mono font-black text-slate-400">{new Date(currentTime).toLocaleTimeString('vi-VN')}</div>
+                <div className="text-[10px] font-bold text-slate-600 uppercase">{filteredItems.length} ITEMS</div>
+            </div>
+            <button 
+              onClick={() => setHideCompleted(!hideCompleted)}
+              className={`p-3 rounded-2xl transition-all border ${hideCompleted ? 'bg-blue-600/20 border-blue-500/50 text-blue-400' : 'bg-slate-900 border-slate-800 text-slate-500'}`}
+            >
+              {hideCompleted ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
+            <div className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-[10px] font-black border ${isOnline ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-rose-500/10 border-rose-500/20 text-rose-400'}`}>
+                <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-emerald-500' : 'bg-rose-500 animate-ping'}`}></div>
+                {isOnline ? 'ONLINE' : 'OFFLINE'}
+            </div>
+            <button onClick={() => setRole(null)} className="p-3 bg-slate-900 hover:bg-rose-500/20 text-slate-500 hover:text-rose-400 rounded-2xl transition-all border border-slate-800">
+                <LogOut size={20} />
+            </button>
+        </div>
+      </header>
+
+      <div className="flex flex-1 overflow-hidden">
+        <aside className="w-80 bg-[#0f172a] border-r border-slate-800 flex flex-col">
+            <div className="p-5 border-b border-slate-800 bg-slate-900/50">
+                <h2 className="font-black text-[10px] uppercase tracking-[0.3em] text-slate-500 flex items-center gap-2">
+                    <ListFilter size={14}/> TỔNG HỢP CẦN LÀM
+                </h2>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
+                {aggregatedNeeded.length === 0 ? (
+                    <div className="h-full flex flex-col items-center justify-center text-slate-600 opacity-20">
+                        <CheckCircle size={48} className="mb-4" />
+                        <p className="font-black uppercase tracking-widest text-xs">Trống đơn</p>
+                    </div>
+                ) : (
+                    aggregatedNeeded.map((agg, idx) => (
+                        <div key={idx} className="bg-slate-900 border border-slate-800 p-4 rounded-[20px] flex justify-between items-center group hover:border-rose-500/30 transition-all">
+                            <span className="font-black text-slate-300 text-sm uppercase tracking-tight">{agg.name}</span>
+                            <span className="bg-rose-600 text-white w-12 h-12 rounded-xl flex items-center justify-center font-black text-2xl shadow-lg shadow-rose-900/20 group-hover:scale-110 transition-transform">
+                                {agg.total}
+                            </span>
+                        </div>
+                    ))
+                )}
+            </div>
+        </aside>
+
+        <main className="flex-1 overflow-x-auto overflow-y-hidden bg-[#020617] p-6 flex gap-6 scrollbar-hide">
+            {filteredItems.length === 0 ? (
+                <div className="flex-1 flex flex-col items-center justify-center text-slate-800">
+                    <Utensils size={100} className="opacity-5 mb-6" />
+                    <p className="text-2xl font-black opacity-10 uppercase tracking-[0.5em]">Waiting for orders</p>
+                </div>
+            ) : (
+                filteredItems.map(({ orderId, tableId, item }) => {
+                    const elapsed = getTimeElapsed(item.timestamp);
+                    const urgencyColor = getUrgencyColor(elapsed, item.status);
+                    const isUrgent = elapsed >= 10 && item.status !== OrderItemStatus.READY;
+                    const isVeryUrgent = elapsed >= 20 && item.status !== OrderItemStatus.READY;
+
+                    return (
+                        <div 
+                            key={item.id}
+                            className={`flex-shrink-0 w-[340px] flex flex-col bg-[#0f172a] rounded-[32px] border-2 transition-all duration-500 shadow-2xl relative overflow-hidden ${
+                                item.status === OrderItemStatus.READY ? 'border-emerald-500 opacity-50 scale-95' : 
+                                isVeryUrgent ? `border-rose-600 ring-4 ring-rose-600/20 animate-pulse` : 
+                                isUrgent ? 'border-amber-500' : 'border-slate-800'
+                            }`}
+                        >
+                            {isVeryUrgent && <div className="absolute inset-0 bg-rose-600/5 pointer-events-none"></div>}
+
+                            <div className="p-6 border-b border-slate-800 flex justify-between items-center bg-slate-900/40">
+                                <div>
+                                    <div className="text-3xl font-black text-white tracking-tighter">{getTableName(tableId)}</div>
+                                    <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-1">Order #{orderId.slice(-4)}</div>
+                                </div>
+                                <div className={`px-4 py-2 rounded-2xl font-mono font-black text-xl flex items-center gap-2 ${
+                                  urgencyColor === 'rose' ? 'bg-rose-600 text-white animate-pulse' :
+                                  urgencyColor === 'orange' ? 'bg-orange-600 text-white animate-pulse' :
+                                  urgencyColor === 'amber' ? 'bg-amber-600 text-white' :
+                                  urgencyColor === 'emerald' ? 'bg-emerald-600 text-white' :
+                                  'bg-slate-800 text-slate-400'
+                                }`}>
+                                    <Clock size={20} /> {elapsed}'
+                                </div>
+                            </div>
+
+                            <div className="flex-1 p-7 flex flex-col">
+                                <div className="flex items-start gap-4 mb-6">
+                                    <span className={`text-5xl font-black shrink-0 ${isVeryUrgent ? 'text-rose-500' : 'text-rose-600'}`}>
+                                        {item.quantity}
+                                    </span>
+                                    <h3 className="text-2xl font-black leading-none text-white pt-2 uppercase tracking-tight">{item.name}</h3>
+                                </div>
+                                
+                                {item.note && (
+                                    <div className="bg-rose-500/10 border border-rose-500/20 p-4 rounded-2xl text-rose-400 text-sm font-black mb-4 flex gap-3">
+                                        <AlertTriangle size={20} className="shrink-0" />
+                                        <span>{item.note}</span>
+                                    </div>
+                                )}
+
+                                {item.selectedOptions && item.selectedOptions.length > 0 && (
+                                    <div className="space-y-2 mb-6">
+                                        {item.selectedOptions.map((opt, i) => (
+                                            <div key={i} className="flex items-center gap-3 text-sm text-slate-400 font-bold bg-slate-800/30 p-2 rounded-lg">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-rose-600"></div>
+                                                {opt}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+
+                                {item.kitchenNote && (
+                                    <div className="mt-auto bg-blue-600/10 border border-blue-600/20 p-4 rounded-2xl text-blue-400 text-[11px] font-black flex gap-2 uppercase tracking-wider">
+                                        <MessageSquare size={16} /> BẾP: {item.kitchenNote}
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="p-6 bg-slate-900/80 flex gap-3 border-t border-slate-800">
+                                <button 
+                                    onClick={() => setNoteModalItem({ orderId, itemId: item.id, currentNote: item.kitchenNote || '' })}
+                                    className="w-16 h-16 bg-slate-800 hover:bg-slate-700 text-slate-400 rounded-2xl transition-all flex items-center justify-center border border-slate-700"
+                                >
+                                    <MessageSquare size={24} />
+                                </button>
+
+                                {item.status !== OrderItemStatus.READY && (
+                                  <button 
+                                      onClick={() => handleStatusChange(orderId, item.id, item.status)}
+                                      className={`flex-1 h-16 rounded-[20px] font-black text-xs uppercase tracking-[0.2em] shadow-2xl transition-all active:scale-95 flex items-center justify-center gap-3 ${
+                                          item.status === OrderItemStatus.PENDING ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-blue-900/40' : 
+                                          'bg-rose-600 hover:bg-rose-500 text-white shadow-rose-900/40'
+                                      }`}
+                                  >
+                                      {item.status === OrderItemStatus.PENDING && <><Play size={18}/> Bắt đầu</>}
+                                      {item.status === OrderItemStatus.PREPARING && <><Zap size={18}/> Xong</>}
+                                  </button>
+                                )}
+                                
+                                {item.status === OrderItemStatus.READY && (
+                                  <div className="flex-1 h-16 rounded-[20px] bg-emerald-600 text-white font-black text-xs uppercase tracking-[0.2em] flex items-center justify-center gap-3">
+                                    <CheckCircle size={20} /> Đã xong
+                                  </div>
+                                )}
+                            </div>
+                        </div>
+                    );
+                })
+            )}
+        </main>
+      </div>
+
+      {noteModalItem && (
+          <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-6 backdrop-blur-xl">
+              <div className="bg-[#0f172a] rounded-[40px] p-10 w-full max-w-lg border border-slate-800 shadow-3xl">
+                  <h3 className="text-2xl font-black text-white mb-6 uppercase tracking-widest text-center">Ghi chú nội bộ</h3>
+                  <textarea 
+                    autoFocus
+                    className="w-full bg-[#020617] text-white border-2 border-slate-800 rounded-[24px] p-6 mb-8 focus:border-rose-600 outline-none h-48 font-bold text-lg"
+                    placeholder="..."
+                    value={noteInputValue || noteModalItem.currentNote}
+                    onChange={(e) => setNoteInputValue(e.target.value)}
+                  />
+                  <div className="grid grid-cols-2 gap-4">
+                      <button 
+                        onClick={() => { setNoteModalItem(null); setNoteInputValue(''); }}
+                        className="py-5 bg-slate-800 text-slate-400 rounded-2xl font-black uppercase tracking-widest hover:bg-slate-700 transition-all"
+                      >
+                          Hủy
+                      </button>
+                      <button 
+                        onClick={() => {
+                            updateOrderItemKitchenNote(noteModalItem.orderId, noteModalItem.itemId, noteInputValue);
+                            setNoteModalItem(null);
+                            setNoteInputValue('');
+                        }}
+                        className="py-5 bg-rose-600 text-white rounded-2xl font-black uppercase tracking-widest hover:bg-rose-500 shadow-xl shadow-rose-900/40 transition-all"
+                      >
+                          Lưu
+                      </button>
+                  </div>
+              </div>
+          </div>
+      )}
+    </div>
+  );
+};
+
+export default KitchenView;

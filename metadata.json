@@ -1,0 +1,7 @@
+{
+  "name": "Lẩu Ngon POS",
+  "description": "Hệ thống quản lý nhà hàng lẩu toàn diện với 5 phân hệ: Khách hàng, Nhân viên, Bếp, Thu ngân và Quản trị.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
