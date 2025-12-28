@@ -267,60 +267,60 @@ const AdminView = () => {
                 </div>
             )}
             {activeTab === 'DASHBOARD' && (
-                <div className="max-w-6xl mx-auto space-y-10">
-                    <div className="flex justify-between items-end">
+                <div className="max-w-6xl mx-auto space-y-6 md:space-y-10">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 md:gap-0">
                         <div>
-                            <h2 className="text-4xl font-black text-slate-800 tracking-tighter">DASHBOARD</h2>
-                            <p className="text-slate-400 font-bold uppercase tracking-widest text-xs mt-1">Dữ liệu kinh doanh thời gian thực</p>
+                            <h2 className="text-2xl md:text-4xl font-black text-slate-800 tracking-tighter">DASHBOARD</h2>
+                            <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] md:text-xs mt-1">Dữ liệu kinh doanh thời gian thực</p>
                         </div>
-                        <div className="flex items-center gap-4">
-                            <div className="bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-100 flex items-center gap-3">
-                                <Calendar size={18} className="text-slate-400"/>
-                                <span className="text-xs font-black text-slate-800 uppercase">Hôm nay: {new Date().toLocaleDateString('vi-VN')}</span>
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 w-full md:w-auto">
+                            <div className="bg-white px-3 sm:px-4 py-2 rounded-lg sm:rounded-xl shadow-sm border border-slate-100 flex items-center gap-2 sm:gap-3 text-[10px] sm:text-xs flex-1 sm:flex-none">
+                                <Calendar size={16} className="text-slate-400 flex-shrink-0"/>
+                                <span className="font-black text-slate-800 uppercase">Hôm nay: {new Date().toLocaleDateString('vi-VN')}</span>
                             </div>
                             <button
                                 onClick={() => setShowCloseDayModal(true)}
-                                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center gap-2 font-black uppercase text-xs tracking-widest"
+                                className="bg-red-600 hover:bg-red-700 text-white px-3 sm:px-4 py-2 rounded-lg sm:rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center gap-2 font-black uppercase text-[10px] sm:text-xs whitespace-nowrap"
                             >
-                                <Power size={16} />
+                                <Power size={14} className="sm:w-4 sm:h-4"/>
                                 KẾT THÚC NGÀY
                             </button>
                         </div>
                     </div>
 
-                    {/* KPI Cards Luxury */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        <div className="bg-white p-8 rounded-[40px] shadow-sm border border-slate-100 group hover:shadow-2xl hover:-translate-y-1 transition-all duration-500">
-                            <div className="flex justify-between items-start mb-6">
-                                <div className="w-14 h-14 bg-rose-50 text-rose-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform"><TrendingUp size={30}/></div>
-                                <span className="text-[10px] font-black text-emerald-500 bg-emerald-50 px-2 py-1 rounded-lg">+12.5%</span>
+                    {/* KPI Cards Luxury - Responsive */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
+                        <div className="bg-white p-4 sm:p-8 rounded-2xl sm:rounded-[40px] shadow-sm border border-slate-100 group hover:shadow-2xl hover:-translate-y-1 transition-all duration-500">
+                            <div className="flex justify-between items-start mb-4 sm:mb-6">
+                                <div className="w-10 h-10 sm:w-14 sm:h-14 bg-rose-50 text-rose-600 rounded-xl sm:rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform"><TrendingUp size={20} className="sm:w-8 sm:h-8"/></div>
+                                <span className="text-[9px] sm:text-[10px] font-black text-emerald-500 bg-emerald-50 px-2 py-1 rounded-lg">+12.5%</span>
                             </div>
-                            <h3 className="text-slate-400 font-bold text-xs uppercase tracking-widest mb-1">DOANH THU</h3>
-                            <div className="text-4xl font-black text-slate-800">{totalRevenue.toLocaleString()}đ</div>
+                            <h3 className="text-slate-400 font-bold text-[10px] sm:text-xs uppercase tracking-widest mb-1 sm:mb-2">DOANH THU</h3>
+                            <div className="text-2xl sm:text-4xl font-black text-slate-800">{totalRevenue.toLocaleString()}đ</div>
                         </div>
-                        <div className="bg-white p-8 rounded-[40px] shadow-sm border border-slate-100 group hover:shadow-2xl hover:-translate-y-1 transition-all duration-500">
-                            <div className="flex justify-between items-start mb-6">
-                                <div className="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform"><Layers size={30}/></div>
-                                <span className="text-[10px] font-black text-blue-500 bg-blue-50 px-2 py-1 rounded-lg">85% Capacity</span>
+                        <div className="bg-white p-4 sm:p-8 rounded-2xl sm:rounded-[40px] shadow-sm border border-slate-100 group hover:shadow-2xl hover:-translate-y-1 transition-all duration-500">
+                            <div className="flex justify-between items-start mb-4 sm:mb-6">
+                                <div className="w-10 h-10 sm:w-14 sm:h-14 bg-blue-50 text-blue-600 rounded-xl sm:rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform"><Layers size={20} className="sm:w-8 sm:h-8"/></div>
+                                <span className="text-[9px] sm:text-[10px] font-black text-blue-500 bg-blue-50 px-2 py-1 rounded-lg">85% Cap</span>
                             </div>
-                            <h3 className="text-slate-400 font-bold text-xs uppercase tracking-widest mb-1">ĐƠN HÀNG</h3>
-                            <div className="text-4xl font-black text-slate-800">{totalOrders} ĐƠN</div>
+                            <h3 className="text-slate-400 font-bold text-[10px] sm:text-xs uppercase tracking-widest mb-1 sm:mb-2">ĐƠN HÀNG</h3>
+                            <div className="text-2xl sm:text-4xl font-black text-slate-800">{totalOrders} <span className="text-lg sm:text-2xl">ĐƠN</span></div>
                         </div>
-                        <div className="bg-white p-8 rounded-[40px] shadow-sm border border-slate-100 group hover:shadow-2xl hover:-translate-y-1 transition-all duration-500">
-                            <div className="flex justify-between items-start mb-6">
-                                <div className="w-14 h-14 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform"><Sparkles size={30}/></div>
+                        <div className="bg-white p-4 sm:p-8 rounded-2xl sm:rounded-[40px] shadow-sm border border-slate-100 group hover:shadow-2xl hover:-translate-y-1 transition-all duration-500">
+                            <div className="flex justify-between items-start mb-4 sm:mb-6">
+                                <div className="w-10 h-10 sm:w-14 sm:h-14 bg-amber-50 text-amber-600 rounded-xl sm:rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform"><Sparkles size={20} className="sm:w-8 sm:h-8"/></div>
                             </div>
-                            <h3 className="text-slate-400 font-bold text-xs uppercase tracking-widest mb-1">BEST SELLER</h3>
-                            <div className="text-xl font-black text-slate-800 line-clamp-1 truncate">{chartData[0]?.name || 'N/A'}</div>
+                            <h3 className="text-slate-400 font-bold text-[10px] sm:text-xs uppercase tracking-widest mb-1 sm:mb-2">BEST SELLER</h3>
+                            <div className="text-lg sm:text-xl font-black text-slate-800 line-clamp-1 truncate">{chartData[0]?.name || 'N/A'}</div>
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-8">
                         {/* Chart Area */}
-                        <div className="bg-white p-10 rounded-[40px] shadow-sm border border-slate-100">
-                            <h3 className="text-lg font-black text-slate-800 uppercase tracking-widest mb-8">TOP MÓN BÁN CHẠY</h3>
-                            <div className="w-full h-80 flex">
-                                <ResponsiveContainer width="100%" height={320} minWidth={0}>
+                        <div className="bg-white p-4 sm:p-10 rounded-2xl sm:rounded-[40px] shadow-sm border border-slate-100">
+                            <h3 className="text-sm sm:text-lg font-black text-slate-800 uppercase tracking-widest mb-4 sm:mb-8">TOP MÓN BÁN CHẠY</h3>
+                            <div className="w-full h-64 sm:h-80 flex">
+                                <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                                     <BarChart data={chartData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
                                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                                         <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 900, fill: '#94a3b8' }} />
@@ -337,19 +337,19 @@ const AdminView = () => {
                         </div>
 
                         {/* AI Insight Center - Cao cấp hơn */}
-                        <div className="bg-slate-900 rounded-[40px] p-10 shadow-2xl relative overflow-hidden group">
+                        <div className="bg-slate-900 rounded-2xl sm:rounded-[40px] p-4 sm:p-10 shadow-2xl relative overflow-hidden group">
                             <div className="absolute -right-20 -top-20 w-64 h-64 bg-rose-600/10 rounded-full blur-3xl transition-all group-hover:bg-rose-600/20"></div>
                             
                             <div className="relative z-10 flex flex-col h-full">
-                                <div className="flex justify-between items-center mb-8">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 bg-gradient-to-br from-rose-500 to-rose-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-rose-900/40"><Sparkles size={20}/></div>
-                                        <h3 className="text-xl font-black text-white uppercase tracking-widest">AI INSIGHTS</h3>
+                                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 mb-4 sm:mb-8">
+                                    <div className="flex items-center gap-2 sm:gap-3">
+                                        <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-rose-500 to-rose-600 rounded-lg sm:rounded-xl flex items-center justify-center text-white shadow-lg shadow-rose-900/40"><Sparkles size={16} className="sm:w-5 sm:h-5"/></div>
+                                        <h3 className="text-base sm:text-xl font-black text-white uppercase tracking-widest">AI INSIGHTS</h3>
                                     </div>
                                     <button 
                                         onClick={handleGenerateReport}
                                         disabled={isLoadingReport}
-                                        className="bg-white text-slate-900 px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-rose-500 hover:text-white transition-all disabled:opacity-50"
+                                        className="bg-white text-slate-900 px-3 sm:px-6 py-2 rounded-lg sm:rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-rose-500 hover:text-white transition-all disabled:opacity-50 whitespace-nowrap"
                                     >
                                         {isLoadingReport ? 'ĐANG PHÂN TÍCH...' : 'PHÂN TÍCH NGAY'}
                                     </button>
