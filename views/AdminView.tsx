@@ -37,6 +37,7 @@ const AdminView = () => {
   const [showPinCode, setShowPinCode] = useState<string | null>(null);
   const [isSubmittingEmployee, setIsSubmittingEmployee] = useState(false);
   const [isGeneratingPin, setIsGeneratingPin] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
 
   const totalRevenue = orders.reduce((sum, o) => sum + o.totalAmount, 0);
   const totalOrders = orders.length;
@@ -161,8 +162,8 @@ const AdminView = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 flex overflow-hidden">
-        {/* Sidebar Luxury */}
-        <aside className="w-72 bg-slate-900 text-white flex flex-col shrink-0">
+        {/* Sidebar - Hidden on mobile, visible on md+ */}
+        <aside className="hidden md:flex w-72 bg-slate-900 text-white flex flex-col shrink-0">
             <div className="p-8">
                 <div className="flex items-center gap-3 mb-10">
                     <div className="w-10 h-10 bg-rose-600 rounded-xl flex items-center justify-center shadow-lg shadow-rose-900/40"><Rocket size={24}/></div>
@@ -204,7 +205,67 @@ const AdminView = () => {
         </aside>
 
         {/* Content Area */}
-        <main className="flex-1 overflow-y-auto p-10">
+        <main className="flex-1 overflow-y-auto p-4 md:p-10">
+            {/* Mobile Menu Button */}
+            <div className="md:hidden flex items-center justify-between mb-6">
+                <h1 className="text-xl font-black text-slate-800">LAUNGON <span className="text-rose-600">PRO</span></h1>
+                <button
+                    onClick={() => setShowMobileMenu(!showMobileMenu)}
+                    className="p-2 bg-white rounded-xl shadow-sm border border-slate-100 hover:bg-slate-50"
+                >
+                    <MenuIcon size={24} className="text-slate-800"/>
+                </button>
+            </div>
+
+            {/* Mobile Menu Drawer */}
+            {showMobileMenu && (
+                <div className="md:hidden fixed inset-0 z-40">
+                    <div className="absolute inset-0 bg-black/50" onClick={() => setShowMobileMenu(false)}></div>
+                    <div className="absolute left-0 top-0 bottom-0 w-64 bg-slate-900 text-white flex flex-col animate-in slide-in-from-left duration-300">
+                        <div className="p-6">
+                            <div className="flex items-center gap-3 mb-8">
+                                <div className="w-10 h-10 bg-rose-600 rounded-xl flex items-center justify-center"><Rocket size={24}/></div>
+                                <div>
+                                    <h1 className="text-lg font-black uppercase tracking-tight">LAUNGON <span className="text-rose-600">PRO</span></h1>
+                                    <p className="text-[8px] font-bold text-slate-500">Admin Control</p>
+                                </div>
+                            </div>
+                            
+                            <nav className="space-y-1">
+                                {[
+                                    { id: 'DASHBOARD', icon: LayoutDashboard, label: 'TỔNG QUAN' },
+                                    { id: 'MENU', icon: MenuIcon, label: 'THỰC ĐƠN' },
+                                    { id: 'EMPLOYEES', icon: Users, label: 'NHÂN VIÊN' },
+                                    { id: 'SETTINGS', icon: Settings, label: 'CÀI ĐẶT' }
+                                ].map(tab => (
+                                    <button 
+                                        key={tab.id}
+                                        onClick={() => {
+                                            setActiveTab(tab.id as any);
+                                            setShowMobileMenu(false);
+                                        }}
+                                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[9px] font-black uppercase transition-all ${activeTab === tab.id ? 'bg-rose-600 text-white' : 'text-slate-400 hover:bg-slate-800'}`}
+                                    >
+                                        <tab.icon size={16}/> {tab.label}
+                                    </button>
+                                ))}
+                            </nav>
+                        </div>
+                        
+                        <div className="mt-auto p-6 border-t border-slate-800">
+                            <button
+                                onClick={() => {
+                                    logout();
+                                    navigate('/login', { replace: true });
+                                }}
+                                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[9px] font-black uppercase text-slate-500 hover:text-rose-400 transition-colors"
+                            >
+                                <LogOut size={16}/> ĐĂNG XUẤT
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
             {activeTab === 'DASHBOARD' && (
                 <div className="max-w-6xl mx-auto space-y-10">
                     <div className="flex justify-between items-end">
