@@ -39,6 +39,28 @@ const AdminView = () => {
   const [isGeneratingPin, setIsGeneratingPin] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
 
+  // Menu management state
+  const [showMenuModal, setShowMenuModal] = useState(false);
+  const [editingMenuItem, setEditingMenuItem] = useState<MenuItem | null>(null);
+  const [menuForm, setMenuForm] = useState<{
+    name: string;
+    price: number;
+    category: ProductCategory;
+    type: ItemType;
+    available: boolean;
+    image: string;
+    isRecommended: boolean;
+  }>({
+    name: '',
+    price: 0,
+    category: ProductCategory.BROTH,
+    type: ItemType.SINGLE,
+    available: true,
+    image: '',
+    isRecommended: false,
+  });
+  const [isSubmittingMenu, setIsSubmittingMenu] = useState(false);
+
   const totalRevenue = orders.reduce((sum, o) => sum + o.totalAmount, 0);
   const totalOrders = orders.length;
   const itemSales: Record<string, number> = {};
@@ -154,6 +176,103 @@ const AdminView = () => {
     if (confirm('Bạn chắc chắn muốn khóa nhân viên này không?')) {
       try {
         await deleteEmployee(id);
+      } catch (err) {
+        alert('Lỗi: ' + (err instanceof Error ? err.message : 'Unknown error'));
+      }
+    }
+  };
+
+  // Menu handlers
+  const handleAddMenuItem = () => {
+    setEditingMenuItem(null);
+    setMenuForm({
+      name: '',
+      price: 0,
+      category: ProductCategory.BROTH,
+      type: ItemType.SINGLE,
+      available: true,
+      image: '',
+      isRecommended: false,
+    });
+    setShowMenuModal(true);
+  };
+
+  const handleEditMenuItem = (item: MenuItem) => {
+    setEditingMenuItem(item);
+    setMenuForm({
+      name: item.name,
+      price: item.price,
+      category: item.category,
+      type: item.type,
+      available: item.available,
+      image: item.image || '',
+      isRecommended: item.isRecommended || false,
+    });
+    setShowMenuModal(true);
+  };
+
+  const handleSaveMenuItem = async () => {
+    try {
+      if (!menuForm.name.trim()) {
+        alert('Vui lòng nhập tên món');
+        return;
+      }
+      if (menuForm.price < 0) {
+        alert('Giá phải >= 0');
+        return;
+      }
+      if (!menuForm.image.trim()) {
+        alert('Vui lòng nhập URL hình ảnh');
+        return;
+      }
+
+      setIsSubmittingMenu(true);
+
+      if (editingMenuItem) {
+        await updateMenuItem({
+          id: editingMenuItem.id,
+          name: menuForm.name,
+          price: menuForm.price,
+          category: menuForm.category,
+          type: menuForm.type,
+          available: menuForm.available,
+          image: menuForm.image,
+          isRecommended: menuForm.isRecommended,
+        });
+      } else {
+        await addMenuItem({
+          name: menuForm.name,
+          price: menuForm.price,
+          category: menuForm.category,
+          type: menuForm.type,
+          available: menuForm.available,
+          image: menuForm.image,
+          isRecommended: menuForm.isRecommended,
+        });
+      }
+
+      setShowMenuModal(false);
+      setMenuForm({
+        name: '',
+        price: 0,
+        category: ProductCategory.BROTH,
+        type: ItemType.SINGLE,
+        available: true,
+        image: '',
+        isRecommended: false,
+      });
+    } catch (err) {
+      alert('Lỗi: ' + (err instanceof Error ? err.message : 'Unknown error'));
+    } finally {
+      setIsSubmittingMenu(false);
+    }
+  };
+
+  const handleDeleteMenuItem = async (id: string) => {
+    const item = menu.find(m => m.id === id);
+    if (confirm(`Xóa "${item?.name}"?`)) {
+      try {
+        await deleteMenuItem(id);
       } catch (err) {
         alert('Lỗi: ' + (err instanceof Error ? err.message : 'Unknown error'));
       }
@@ -922,10 +1041,7 @@ const AdminView = () => {
                             <p className="text-slate-400 font-bold uppercase tracking-widest text-xs mt-1">Quản lý menu và các món ăn</p>
                         </div>
                         <button
-                            onClick={() => {
-                                // TODO: Add menu item modal
-                                alert('Tính năng sẽ được cập nhật');
-                            }}
+                            onClick={handleAddMenuItem}
                             className="bg-rose-600 hover:bg-rose-700 text-white px-6 py-3 rounded-2xl shadow-lg hover:shadow-xl transition-all flex items-center gap-2 font-black uppercase text-xs tracking-widest"
                         >
                             <Plus size={20} />
@@ -967,20 +1083,14 @@ const AdminView = () => {
                                 {/* Actions */}
                                 <div className="flex gap-2">
                                     <button
-                                        onClick={() => {
-                                            alert('Chức năng sửa sẽ được cập nhật');
-                                        }}
+                                        onClick={() => handleEditMenuItem(item)}
                                         className="flex-1 bg-blue-100 hover:bg-blue-200 text-blue-800 font-black text-xs py-2 rounded-xl transition-colors flex items-center justify-center gap-2"
                                     >
                                         <Edit size={16} />
                                         Sửa
                                     </button>
                                     <button
-                                        onClick={() => {
-                                            if (confirm(`Xóa ${item.name}?`)) {
-                                                deleteMenuItem(item.id);
-                                            }
-                                        }}
+                                        onClick={() => handleDeleteMenuItem(item.id)}
                                         className="flex-1 bg-red-100 hover:bg-red-200 text-red-800 font-black text-xs py-2 rounded-xl transition-colors flex items-center justify-center gap-2"
                                     >
                                         <Trash2 size={16} />
@@ -1028,6 +1138,130 @@ const AdminView = () => {
                             >
                                 <Trash2 size={18} />
                                 Xóa doanh thu hôm nay
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Menu Edit Modal */}
+            {showMenuModal && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-4 sm:p-0">
+                    <div className="bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl max-w-md w-full mx-auto p-6 sm:p-8 space-y-6 max-h-[90vh] overflow-y-auto sm:max-h-full">
+                        <div className="flex items-center justify-between">
+                            <h2 className="text-2xl font-black text-slate-800">
+                                {editingMenuItem ? 'Sửa Món' : 'Thêm Món Mới'}
+                            </h2>
+                            <button
+                                onClick={() => setShowMenuModal(false)}
+                                className="text-slate-400 hover:text-slate-600"
+                            >
+                                <X size={24} />
+                            </button>
+                        </div>
+
+                        <div className="space-y-4">
+                            {/* Name */}
+                            <div>
+                                <label className="block text-xs font-black text-slate-700 uppercase mb-2">Tên món</label>
+                                <input
+                                    type="text"
+                                    value={menuForm.name}
+                                    onChange={(e) => setMenuForm({...menuForm, name: e.target.value})}
+                                    className="w-full px-4 py-3 bg-slate-100 rounded-xl border border-slate-200 focus:border-rose-600 focus:outline-none font-bold"
+                                    placeholder="VD: Lẩu hải sản"
+                                />
+                            </div>
+
+                            {/* Price */}
+                            <div>
+                                <label className="block text-xs font-black text-slate-700 uppercase mb-2">Giá (đ)</label>
+                                <input
+                                    type="number"
+                                    value={menuForm.price}
+                                    onChange={(e) => setMenuForm({...menuForm, price: parseFloat(e.target.value) || 0})}
+                                    className="w-full px-4 py-3 bg-slate-100 rounded-xl border border-slate-200 focus:border-rose-600 focus:outline-none font-bold"
+                                    placeholder="0"
+                                />
+                            </div>
+
+                            {/* Category */}
+                            <div>
+                                <label className="block text-xs font-black text-slate-700 uppercase mb-2">Danh mục</label>
+                                <select
+                                    value={menuForm.category}
+                                    onChange={(e) => setMenuForm({...menuForm, category: e.target.value as ProductCategory})}
+                                    className="w-full px-4 py-3 bg-slate-100 rounded-xl border border-slate-200 focus:border-rose-600 focus:outline-none font-bold"
+                                >
+                                    {Object.values(ProductCategory).map(cat => (
+                                        <option key={cat} value={cat}>{CATEGORY_LABELS[cat]}</option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            {/* Availability */}
+                            <div>
+                                <label className="flex items-center gap-3 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={menuForm.available}
+                                        onChange={(e) => setMenuForm({...menuForm, available: e.target.checked})}
+                                        className="w-4 h-4"
+                                    />
+                                    <span className="text-sm font-bold text-slate-700">Có sẵn</span>
+                                </label>
+                            </div>
+
+                            {/* Recommended */}
+                            <div>
+                                <label className="flex items-center gap-3 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={menuForm.isRecommended}
+                                        onChange={(e) => setMenuForm({...menuForm, isRecommended: e.target.checked})}
+                                        className="w-4 h-4"
+                                    />
+                                    <span className="text-sm font-bold text-slate-700">Được đề xuất</span>
+                                </label>
+                            </div>
+
+                            {/* Image URL */}
+                            <div>
+                                <label className="block text-xs font-black text-slate-700 uppercase mb-2">URL hình ảnh (tùy chọn)</label>
+                                <input
+                                    type="text"
+                                    value={menuForm.image}
+                                    onChange={(e) => setMenuForm({...menuForm, image: e.target.value})}
+                                    className="w-full px-4 py-3 bg-slate-100 rounded-xl border border-slate-200 focus:border-rose-600 focus:outline-none font-bold"
+                                    placeholder="https://..."
+                                />
+                            </div>
+                        </div>
+
+                        <div className="flex gap-3 pt-4">
+                            <button
+                                onClick={() => setShowMenuModal(false)}
+                                disabled={isSubmittingMenu}
+                                className="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-800 font-black uppercase text-xs py-3 rounded-xl transition-colors disabled:opacity-50"
+                            >
+                                Hủy
+                            </button>
+                            <button
+                                onClick={handleSaveMenuItem}
+                                disabled={isSubmittingMenu}
+                                className="flex-1 bg-rose-600 hover:bg-rose-700 text-white font-black uppercase text-xs py-3 rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                            >
+                                {isSubmittingMenu ? (
+                                    <>
+                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"/>
+                                        Đang lưu...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Save size={16} />
+                                        Lưu
+                                    </>
+                                )}
                             </button>
                         </div>
                     </div>

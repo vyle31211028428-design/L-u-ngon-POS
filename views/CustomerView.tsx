@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { useRestaurant } from '../context/RestaurantContext';
 import { CATEGORY_LABELS } from '../constants';

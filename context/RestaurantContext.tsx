@@ -311,7 +311,33 @@ export const RestaurantProvider = ({ children }: { children?: ReactNode }) => {
 
         // Set initial state
         if (menuRes.data) setMenu(menuRes.data.map(transformMenu));
-        if (tablesRes.data) setTables(tablesRes.data.map(transformTable));
+        
+        // Create default table structure (always have 12 tables)
+        const defaultTables: Table[] = Array.from({ length: 12 }, (_, i) => ({
+          id: `t${i + 1}`,
+          name: `Bàn ${i + 1}`,
+          status: 'EMPTY' as TableStatus,
+          guestCount: 0,
+          billRequested: false,
+          currentOrderId: undefined,
+          reservationId: undefined,
+        }));
+        
+        // Merge with Supabase data if available
+        if (tablesRes.data && tablesRes.data.length > 0) {
+          const supabaseTables = tablesRes.data.map(transformTable);
+          // Merge: Supabase data takes precedence
+          const mergedTables = defaultTables.map(defaultTable => 
+            supabaseTables.find(st => st.id === defaultTable.id) || defaultTable
+          );
+          setTables(mergedTables);
+        } else {
+          // Use only default tables if Supabase is empty
+          setTables(defaultTables);
+        }
+        
+        console.log('📊 Tables loaded:', defaultTables.length, 'tables');
+        
         if (ordersRes.data) setOrders(ordersRes.data.map(transformOrder));
         if (reservationsRes.data)
           setReservations(reservationsRes.data.map(transformReservation));
