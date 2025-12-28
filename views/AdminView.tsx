@@ -6,7 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, PieChart, Pie } from 'recharts';
 import { generateDailyReport } from '../services/geminiService';
 // Added missing Calendar icon import
-import { LayoutDashboard, Menu as MenuIcon, Settings, Sparkles, Plus, Edit, Trash2, X, Save, Eye, EyeOff, Users, KeyRound, Download, GripVertical, LogOut, TrendingUp, TrendingDown, Layers, Rocket, Calendar, AlertCircle, Power, ChefHat, Shield, Phone as PhoneIcon, Dices } from 'lucide-react';
+import { LayoutDashboard, Menu as MenuIcon, Settings, Sparkles, Plus, Edit, Trash2, X, Save, Eye, EyeOff, Users, KeyRound, Download, GripVertical, LogOut, TrendingUp, TrendingDown, Layers, Rocket, Calendar, AlertCircle, Power, ChefHat, Shield, Phone as PhoneIcon, Dices, Coffee } from 'lucide-react';
 import { ProductCategory, MenuItem, Role, ItemType, Employee } from '../types';
 import { CATEGORY_LABELS } from '../constants';
 
@@ -907,6 +907,127 @@ const AdminView = () => {
                                         Lưu
                                     </>
                                 )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            
+            {/* MENU TAB */}
+            {activeTab === 'MENU' && (
+                <div className="max-w-7xl mx-auto">
+                    <div className="mb-10 flex justify-between items-end">
+                        <div>
+                            <h2 className="text-4xl font-black text-slate-800 tracking-tighter">THỰC ĐƠN</h2>
+                            <p className="text-slate-400 font-bold uppercase tracking-widest text-xs mt-1">Quản lý menu và các món ăn</p>
+                        </div>
+                        <button
+                            onClick={() => {
+                                // TODO: Add menu item modal
+                                alert('Tính năng sẽ được cập nhật');
+                            }}
+                            className="bg-rose-600 hover:bg-rose-700 text-white px-6 py-3 rounded-2xl shadow-lg hover:shadow-xl transition-all flex items-center gap-2 font-black uppercase text-xs tracking-widest"
+                        >
+                            <Plus size={20} />
+                            Thêm món mới
+                        </button>
+                    </div>
+
+                    {/* Menu Grid */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
+                        {menu.map(item => (
+                            <div key={item.id} className="bg-white p-6 rounded-[32px] shadow-sm border border-slate-100 hover:shadow-lg transition-all">
+                                {/* Image */}
+                                <div className="w-full h-48 bg-slate-100 rounded-2xl mb-4 flex items-center justify-center overflow-hidden">
+                                    {item.image ? (
+                                        <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                                    ) : (
+                                        <Coffee size={48} className="text-slate-400" />
+                                    )}
+                                </div>
+
+                                {/* Info */}
+                                <h3 className="text-xl font-black text-slate-800 mb-2 line-clamp-2">{item.name}</h3>
+                                
+                                {/* Price & Status */}
+                                <div className="flex items-center justify-between mb-4">
+                                    <div className="text-2xl font-black text-rose-600">{item.price.toLocaleString()}đ</div>
+                                    <span className={`text-xs font-black uppercase px-3 py-1 rounded-lg ${
+                                        item.available ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'
+                                    }`}>
+                                        {item.available ? 'CÓ' : 'HẾT'}
+                                    </span>
+                                </div>
+
+                                {/* Category */}
+                                <div className="text-xs text-slate-500 uppercase font-bold mb-4">
+                                    Danh mục: {CATEGORY_LABELS[item.category]}
+                                </div>
+
+                                {/* Actions */}
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => {
+                                            alert('Chức năng sửa sẽ được cập nhật');
+                                        }}
+                                        className="flex-1 bg-blue-100 hover:bg-blue-200 text-blue-800 font-black text-xs py-2 rounded-xl transition-colors flex items-center justify-center gap-2"
+                                    >
+                                        <Edit size={16} />
+                                        Sửa
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            if (confirm(`Xóa ${item.name}?`)) {
+                                                deleteMenuItem(item.id);
+                                            }
+                                        }}
+                                        className="flex-1 bg-red-100 hover:bg-red-200 text-red-800 font-black text-xs py-2 rounded-xl transition-colors flex items-center justify-center gap-2"
+                                    >
+                                        <Trash2 size={16} />
+                                        Xóa
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {menu.length === 0 && (
+                        <div className="text-center py-20">
+                            <Coffee size={48} className="mx-auto text-slate-300 mb-4" />
+                            <p className="text-slate-400 font-bold">Chưa có món nào. Hãy thêm món mới!</p>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* SETTINGS TAB */}
+            {activeTab === 'SETTINGS' && (
+                <div className="max-w-2xl mx-auto">
+                    <div className="mb-10">
+                        <h2 className="text-4xl font-black text-slate-800 tracking-tighter">CÀI ĐẶT</h2>
+                        <p className="text-slate-400 font-bold uppercase tracking-widest text-xs mt-1">Cấu hình hệ thống</p>
+                    </div>
+
+                    <div className="space-y-6">
+                        <div className="bg-white p-8 rounded-[32px] shadow-sm border border-slate-100">
+                            <h3 className="text-lg font-black text-slate-800 mb-4 uppercase">Thông tin hệ thống</h3>
+                            <div className="space-y-3 text-sm">
+                                <p><span className="font-bold text-slate-700">Ứng dụng:</span> <span className="text-slate-600">Lẩu Ngon POS v1.0</span></p>
+                                <p><span className="font-bold text-slate-700">Phiên bản:</span> <span className="text-slate-600">1.0.0</span></p>
+                                <p><span className="font-bold text-slate-700">Database:</span> <span className="text-slate-600">Supabase PostgreSQL</span></p>
+                                <p><span className="font-bold text-slate-700">Nhân viên:</span> <span className="text-slate-600">{employees.length} người</span></p>
+                                <p><span className="font-bold text-slate-700">Món ăn:</span> <span className="text-slate-600">{menu.length} món</span></p>
+                            </div>
+                        </div>
+
+                        <div className="bg-white p-8 rounded-[32px] shadow-sm border border-slate-100">
+                            <h3 className="text-lg font-black text-slate-800 mb-4 uppercase">Quản lý dữ liệu</h3>
+                            <button
+                                onClick={() => setShowClearRevenueModal(true)}
+                                className="w-full bg-amber-100 hover:bg-amber-200 text-amber-800 font-black text-xs uppercase py-3 rounded-xl transition-colors flex items-center justify-center gap-2"
+                            >
+                                <Trash2 size={18} />
+                                Xóa doanh thu hôm nay
                             </button>
                         </div>
                     </div>
